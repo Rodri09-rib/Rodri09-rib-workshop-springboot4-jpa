@@ -153,46 +153,6 @@ isso, um `Set` não deduplicaria o mesmo cliente duas vezes.
 O `postgresql` também está declarado em âmbito `runtime`, mas não há perfil que o use: o
 `application.properties` aponta para H2.
 
-## Como executar
-
-**Requisitos:** JDK 25 e Maven 3.9+ (ou o *wrapper* incluído, `./mvnw`). Nada mais — a base
-de dados é H2 em memória e é criada e destruída a cada arranque, por isso não há nada para
-subir.
-
-```bash
-./mvnw spring-boot:run     # compila e arranca em http://localhost:8080
-./mvnw test               # corre os testes
-```
-
-Ou pela IDE: importar como projeto Maven e executar `CourseApplication`.
-
-### Base de dados
-
-O perfil `test` está ativo por omissão em `application.properties`, o que faz a aplicação
-arrancar com H2 em memória e já povoada.
-
-| | |
-| --- | --- |
-| URL de JDBC | `jdbc:h2:mem:testdb` |
-| Utilizador | `sa` (sem palavra-passe) |
-| Consola H2 | <http://localhost:8080/h2-console> |
-
-Com `show-sql=true` e `format_sql=true`, cada *statement* aparece no consola com o SQL
-formatado — é a forma mais rápida de ver o que cada associação gerou.
-
-### Exemplo
-
-```bash
-curl http://localhost:8080/products/1
-
-curl -X POST http://localhost:8080/users \
-  -H 'Content-Type: application/json' \
-  -d '{"name":"Ana Silva","email":"ana@example.com","phone":"912345678","password":"123456"}'
-
-curl -i http://localhost:8080/users/9999
-# HTTP/1.1 404 ... {"timestamp":"...","status":404,"error":"Resource not found.",
-#                  "message":"Resource not found. iD 9999","path":"/users/9999"}
-```
 
 ## API
 
@@ -211,19 +171,6 @@ curl -i http://localhost:8080/users/9999
 | `GET` | `/orders/{id}` | Consulta um pedido, com itens e total |
 
 Não há autenticação em nenhuma rota: qualquer pedido HTTP chega ao serviço.
-
-## Testes
-
-```bash
-./mvnw clean test
-```
-
-**1 teste**, a passar. `CourseApplicationTests.contextLoads()` arranca o contexto completo
-com o perfil `test`: sem ele, nem se sabe se a aplicação levanta com o esquema criado e as
-associações a carregar.
-
-Ainda não há cobertura de comportamento. O CRUD de clientes, a tradução de exceções em
-respostas HTTP e o `getTotal()` do pedido estão por testar — é o próximo passo.
 
 ## Estrutura
 
