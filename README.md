@@ -2,7 +2,7 @@
 
 # Projeto Web Services
 
-**API REST de comércio eletrónico em Java, com Spring Boot 4, JPA e Hibernate**
+**API REST de comércio eletrônico em Java, com Spring Boot 4, JPA e Hibernate**
 
 [![Licença MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/Rodri09-rib/Rodri09-rib-workshop-springboot4-jpa/blob/main/LICENSE)
 [![Java 25](https://img.shields.io/badge/Java-25-orange.svg)](https://openjdk.org/)
@@ -18,18 +18,17 @@ Este é um projeto de desenvolvimento de *web services* em Java utilizando o eco
 Spring Boot, JPA e Hibernate, com o objetivo de construir o *backend* para um sistema de
 comércio eletrónico e gerenciamento de pedidos.
 
-O foco não é o produto: é a **cadeia completa de um serviço REST** — do mapeamento de
+O foco não é o produto: é a **cadeia completa de um serviço REST** do mapeamento de
 entidades e associações, à passagem pela camada de serviço, até à tradução de erros em
 respostas HTTP. As rotas expõem clientes, produtos, categorias e pedidos; o trabalho real
 está no modelo de domínio e no tratamento de exceções.
 
 O projeto está organizado em **camadas** (`resource`, `service`, `repository`, `entities`):
-o `resource` conhece o `service`, o `service` conhece o `repository` e as entidades, e
-ninguém sobe. É essa inversão que permite trocar o repositório sem tocar no serviço.
+o `resource` conhece o `service`, o `service` conhece o `repository` e as entidades.
 
 ## Funcionalidades
 
-**Clientes** — recurso com o CRUD completo.
+**Clientes** recurso com o CRUD completo.
 
 - `GET /users` e `GET /users/{id}` para consulta.
 - `POST /users` devolve `201 Created` e o URI do recurso criado, montado com
@@ -44,7 +43,7 @@ ninguém sobe. É essa inversão que permite trocar o repositório sem tocar no 
 - O total de um pedido (`getTotal()`) é calculado a partir dos itens, e o subtotal de cada
   item a partir de `price * quantity`. Nenhum dos dois é guardado na base: são derivados.
 
-**Tratamento de exceções** — erros de negócio viram respostas HTTP com corpo padronizado.
+**Tratamento de exceções** erros de negócio viram respostas HTTP com corpo padronizado.
 
 - `ResourceNotFoundException` → `404 Not Found`, com a mensagem `Resource not found. iD {id}`.
 - `DatabaseException` → `400 Bad Request`, o que acontece quando um cliente com pedidos é
@@ -69,16 +68,16 @@ private Long id;
 private Order order;
 ```
 
-**`@ManyToOne` de `Order` para `User`** — o dono da associação é o pedido
+**`@ManyToOne` de `Order` para `User`** o dono da associação é o pedido
 (`@JoinColumn(name = "client_id")`), porque é ele que perde se o cliente for apagado. No
 lado inverso, `User.orders` é `@JsonIgnore`: sem ele, serializar um cliente tentava percorrer
 os pedidos, que voltavam ao cliente, e a resposta não terminava.
 
-**`@OneToMany` de `Order` para `OrderItem`** — o lado inverso é `mappedBy = "id.order"`,
+**`@OneToMany` de `Order` para `OrderItem`** o lado inverso é `mappedBy = "id.order"`,
 porque o nome da propriedade que contém o pai é `id.order` (o `id` é um
 `@EmbeddedId`, não um campo simples).
 
-**`@ManyToMany` entre `Product` e `Category`** — o produto é o dono, com a tabela de
+**`@ManyToMany` entre `Product` e `Category`** o produto é o dono, com a tabela de
 ligação `tb_product_category`; a categoria só tem `mappedBy = "categories"`.
 
 **`@Embeddable` como chave composta** — `OrderItem` não tem `@Id` próprio: tem um
@@ -86,7 +85,7 @@ ligação `tb_product_category`; a categoria só tem `mappedBy = "categories"`.
 aparece duas vezes no mesmo pedido. O `equals` e o `hashCode` do `OrderItemPK` comparam
 `order` **e** `product`, e o do `OrderItem` compara o `id` composto.
 
-**O estado do pedido é gravado como código, não como texto** — `OrderStatus` é um `enum`
+**O estado do pedido é gravado como código, não como texto** `OrderStatus` é um `enum`
 com `WAITING_PAYMENT(1)`, `PAID(2)`, `SHIPPED(3)`, `DELIVERED(4)` e `CANCELED(5)`, e a
 entidade guarda o `int` do código. Um `valueOf(int)` próprio traduz o código de volta, e
 lança `IllegalArgumentException` se não corresponder a nenhum estado — o `valueOf` de
@@ -96,7 +95,7 @@ lança `IllegalArgumentException` se não corresponder a nenhum estado — o `va
 
 **As entidades são serializadas diretamente.** Não há DTOs: o que sai da API é a entidade.
 É aceitável num projeto didático e simplifica a leitura das respostas, mas obriga a
-cuidado no *what* é exposto — daí o `@JsonIgnore` nas coleções de retorno e no `password`
+cuidado no *what* é exposto daí o `@JsonIgnore` nas coleções de retorno e no `password`
 de `User`.
 
 **`@Profile("test")` isola o povoamento.** O `TestConfig` é um `CommandLineRunner` que só
@@ -106,7 +105,7 @@ pagamento. O mesmo `CommandLineRunner` noutro perfil deixaria a base vazia, e fo
 registo explícito que evitou um `@Component` a correr sempre.
 
 **O `CommandLineRunner` salva duas vezes.** Os produtos são guardados antes das categorias
-para que tenham `id` (gerado pela base), e outra vez depois de `add(cat)` — a primeira
+para que tenham `id` (gerado pela base), e outra vez depois de `add(cat)` a primeira
 gravação cria a linha, a segunda persiste a coleção de categorias. É a sequência que
 resolve a dependência entre as duas associações sem cascade.
 
