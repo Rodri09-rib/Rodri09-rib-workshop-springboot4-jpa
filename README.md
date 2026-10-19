@@ -228,7 +228,7 @@ São limitações de um projeto em construção, e não esquecimentos:
   lança `NoSuchElementException`, que o `@ControllerAdvice` não traduz, e o cliente recebe
   um `500` em vez de um `404`.
 - **Não há `@ExceptionHandler` genérico.** Uma exceção não mapeada — violação de restrições
-  que não seja o `delete`, por exemplo — escapa como `500` e devolve a mensagem interna do
+  que não seja o `delete`, por exemplo escapa como `500` e devolve a mensagem interna do
   Hibernate.
 - **A palavra-passe é devolvida na resposta.** `User.password` não tem `@JsonIgnore`, e
   `UserService.update` também não a atualiza. Num projeto a sério, `password` levaria
