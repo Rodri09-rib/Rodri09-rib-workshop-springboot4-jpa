@@ -16,10 +16,10 @@
 
 Este é um projeto de desenvolvimento de *web services* em Java utilizando o ecossistema
 Spring Boot, JPA e Hibernate, com o objetivo de construir o *backend* para um sistema de
-comércio eletrónico e gerenciamento de pedidos.
+comércio eletrônico e gerenciamento de pedidos.
 
 O foco não é o produto: é a **cadeia completa de um serviço REST** do mapeamento de
-entidades e associações, à passagem pela camada de serviço, até à tradução de erros em
+entidades e associações, pela camada de serviço, até a tradução de erros em
 respostas HTTP. As rotas expõem clientes, produtos, categorias e pedidos; o trabalho real
 está no modelo de domínio e no tratamento de exceções.
 
@@ -41,13 +41,13 @@ o `resource` conhece o `service`, o `service` conhece o `repository` e as entida
 
 - `GET /products`, `GET /categories` e `GET /orders`, com detalhe por `/{id}`.
 - O total de um pedido (`getTotal()`) é calculado a partir dos itens, e o subtotal de cada
-  item a partir de `price * quantity`. Nenhum dos dois é guardado na base: são derivados.
+  item a partir de `price * quantity`. Nenhum dos dois é salvo no banco: são derivados.
 
 **Tratamento de exceções** erros de negócio viram respostas HTTP com corpo padronizado.
 
 - `ResourceNotFoundException` → `404 Not Found`, com a mensagem `Resource not found. iD {id}`.
 - `DatabaseException` → `400 Bad Request`, o que acontece quando um cliente com pedidos é
-  apagado e a base recusa por violação de integridade referencial.
+  apagado e o banco recusa por violação de integridade referencial.
 - Todas as respostas de erro seguem o mesmo formato (`StandardError`): `timestamp`,
   `status`, `error`, `message` e `path`.
 
@@ -78,7 +78,7 @@ porque o nome da propriedade que contém o pai é `id.order` (o `id` é um
 `@EmbeddedId`, não um campo simples).
 
 **`@ManyToMany` entre `Product` e `Category`** o produto é o dono, com a tabela de
-ligação `tb_product_category`; a categoria só tem `mappedBy = "categories"`.
+junção `tb_product_category`; a categoria só tem `mappedBy = "categories"`.
 
 **`@Embeddable` como chave composta** `OrderItem` não tem `@Id` próprio: tem um
 `@EmbeddedId` (`OrderItemPK`) com as duas referências, o que garante que o mesmo produto não
@@ -99,22 +99,22 @@ cuidado no *what* é exposto daí o `@JsonIgnore` nas coleções de retorno e no
 de `User`.
 
 **`@Profile("test")` isola o povoamento.** O `TestConfig` é um `CommandLineRunner` que só
-corre no perfil `test`, e `application.properties` ativa esse perfil por omissão. Arrancar a
+corre no perfil `test`, e `application.properties` ativa esse perfil por padrão. Iniciar a
 aplicação já devolve dados: 3 categorias, 5 produtos, 2 clientes, 3 pedidos, 4 itens e 1
-pagamento. O mesmo `CommandLineRunner` noutro perfil deixaria a base vazia, e foi esse
-registo explícito que evitou um `@Component` a correr sempre.
+pagamento. O mesmo `CommandLineRunner` em outro perfil deixaria o banco vazio, e foi esse
+registro explícito que evitou um `@Component` rodando sempre.
 
 **O `CommandLineRunner` salva duas vezes.** Os produtos são guardados antes das categorias
-para que tenham `id` (gerado pela base), e outra vez depois de `add(cat)` a primeira
+para que tenham `id` (gerado pelo banco), e outra vez depois de `add(cat)` a primeira
 gravação cria a linha, a segunda persiste a coleção de categorias. É a sequência que
 resolve a dependência entre as duas associações sem cascade.
 
-**O `delete` apanha a violação de integridade e traduz-a.** `UserService.delete` envolve o
+**O `delete` captura a violação de integridade e a traduz.** `UserService.delete` envolve o
 `deleteById` em `try/catch`: `EmptyResultDataAccessException` passa a
 `ResourceNotFoundException` (o `deleteById` do Spring Data é silencioso quando o `id` não
 existe) e `DataIntegrityViolationException` passa a `DatabaseException`. Sem o `catch`, um
-cliente com pedidos devolveria um `500` com *stack trace* em vez de um `400` a dizer o que
-se passou.
+cliente com pedidos devolveria um `500` com *stack trace* em vez de um `400` explicando o
+que aconteceu.
 
 **`findById` usa `Optional.orElseThrow`.** O serviço de clientes devolve
 `repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id))` em vez de
@@ -133,7 +133,7 @@ coleções preguiçosas. Em produção desligava-se: o custo passa a ser uma `N+
 em vez de uma falha.
 
 **As entidades implementam `Serializable`** e definem `hashCode`/`equals` pelo `id`, para
-que um objeto da lista seja o mesmo objeto do `Set` quando é seria com a mesma chave. Sem
+que um objeto da lista seja o mesmo objeto do `Set` quando serializado com a mesma chave. Sem
 isso, um `Set` não deduplicaria o mesmo cliente duas vezes.
 
 ## Stack
@@ -146,10 +146,10 @@ isso, um `Set` não deduplicaria o mesmo cliente duas vezes.
 | Persistência | Spring Data JPA + Hibernate, com `@Embeddable` para a chave composta |
 | Base de dados | H2 em memória (`jdbc:h2:mem:testdb`) com `CommandLineRunner` de povoamento |
 | Exceções | `@ControllerAdvice` com `StandardError` como corpo único de erro |
-| Testes | Spring Boot Test (JUnit 5), arranque do contexto |
+| Testes | Spring Boot Test (JUnit 5), inicialização do contexto |
 | Build | Maven, com *wrapper* (`mvnw`) incluído |
 
-O `postgresql` também está declarado em âmbito `runtime`, mas não há perfil que o use: o
+O `postgresql` também está declarado no escopo `runtime`, mas não há perfil que o use: o
 `application.properties` aponta para H2.
 
 
@@ -178,7 +178,7 @@ src/
 ├── main/java/com/educandoweb/course/
 │   ├── CourseApplication.java      classe principal (@SpringBootApplication)
 │   ├── config/
-│   │   └── TestConfig.java         CommandLineRunner que popula a base (@Profile("test"))
+│   │   └── TestConfig.java         CommandLineRunner que popula o banco (@Profile("test"))
 │   ├── entities/
 │   │   ├── User.java               tb_user     — 1:N para Order
 │   │   ├── Product.java            tb_product  — N:M com Category, 1:N com OrderItem
@@ -197,7 +197,7 @@ src/
 │       └── exceptions/             ResourceNotFoundException, DatabaseException
 ├── main/resources/
 │   ├── application.properties     perfil ativo e open-in-view
-│   └── application-test.properties  H2, consola e SHOW SQL
+│   └── application-test.properties  H2, console e SHOW SQL
 └── test/java/                      Spring Boot Test
 ```
 
@@ -230,7 +230,7 @@ São limitações de um projeto em construção, e não esquecimentos:
 - **Não há `@ExceptionHandler` genérico.** Uma exceção não mapeada — violação de restrições
   que não seja o `delete`, por exemplo escapa como `500` e devolve a mensagem interna do
   Hibernate.
-- **A palavra-passe é devolvida na resposta.** `User.password` não tem `@JsonIgnore`, e
+- **A senha é devolvida na resposta.** `User.password` não tem `@JsonIgnore`, e
   `UserService.update` também não a atualiza. Num projeto a sério, `password` levaria
   `@JsonIgnore`, `BCryptPasswordEncoder` e um DTO de entrada.
 - **Preços e totais são `double`.** `price * quantity` acumula erro de arredondamento em
@@ -239,7 +239,7 @@ São limitações de um projeto em construção, e não esquecimentos:
   `NullPointerException` ao ser serializado.
 - **`OrderItem.getProuct()` tem o nome trocado.** Como não há `@JsonIgnore`, o campo sai no
   JSON como `prouct`, e não `product`.
-- **Os dados não sobrevivem ao arranque.** O H2 é `mem`, pelo que cada reinício volta aos
+- **Os dados não sobrevivem à inicialização.** O H2 é `mem`, pelo que cada reinício volta aos
   dados do `TestConfig`.
 - **Não há autenticação nem autorização.** Todas as rotas estão abertas, incluindo a
   criação e o apagamento de clientes.
