@@ -37,7 +37,7 @@ o `resource` conhece o `service`, o `service` conhece o `repository` e as entida
   corpo é ignorado e vale o do *path*.
 - `DELETE /users/{id}` devolve `204 No Content`.
 
-**Produtos, categorias e pedidos** — leitura.
+**Produtos, categorias e pedidos** leitura.
 
 - `GET /products`, `GET /categories` e `GET /orders`, com detalhe por `/{id}`.
 - O total de um pedido (`getTotal()`) é calculado a partir dos itens, e o subtotal de cada
@@ -88,7 +88,7 @@ aparece duas vezes no mesmo pedido. O `equals` e o `hashCode` do `OrderItemPK` c
 **O estado do pedido é gravado como código, não como texto** `OrderStatus` é um `enum`
 com `WAITING_PAYMENT(1)`, `PAID(2)`, `SHIPPED(3)`, `DELIVERED(4)` e `CANCELED(5)`, e a
 entidade guarda o `int` do código. Um `valueOf(int)` próprio traduz o código de volta, e
-lança `IllegalArgumentException` se não corresponder a nenhum estado — o `valueOf` de
+lança `IllegalArgumentException` se não corresponder a nenhum estado o `valueOf` de
 `Enum` só funcionaria por nome.
 
 ## Decisões de projeto
