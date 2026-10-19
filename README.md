@@ -55,7 +55,7 @@ o `resource` conhece o `service`, o `service` conhece o `repository` e as entida
 
 O modelo é o exercício principal, por isso vale apontar **onde** cada associação aparece.
 
-**`@OneToOne` com `@MapsId` entre `Order` e `Payment`** — o `Payment` não tem chave
+**`@OneToOne` com `@MapsId` entre `Order` e `Payment`** o `Payment` não tem chave
 própria: herda o `id` do pedido, e a coluna `order_id` é simultaneamente chave estrangeira
 e chave primária. Uma única linha para as duas coisas, sem duplicar o identificador.
 
@@ -80,7 +80,7 @@ porque o nome da propriedade que contém o pai é `id.order` (o `id` é um
 **`@ManyToMany` entre `Product` e `Category`** o produto é o dono, com a tabela de
 ligação `tb_product_category`; a categoria só tem `mappedBy = "categories"`.
 
-**`@Embeddable` como chave composta** — `OrderItem` não tem `@Id` próprio: tem um
+**`@Embeddable` como chave composta** `OrderItem` não tem `@Id` próprio: tem um
 `@EmbeddedId` (`OrderItemPK`) com as duas referências, o que garante que o mesmo produto não
 aparece duas vezes no mesmo pedido. O `equals` e o `hashCode` do `OrderItemPK` comparam
 `order` **e** `product`, e o do `OrderItem` compara o `id` composto.
